@@ -17,6 +17,8 @@ import APICodeDialog from '@/views/chatflows/APICodeDialog'
 import ViewMessagesDialog from '@/ui-component/dialog/ViewMessagesDialog'
 import ChatflowConfigurationDialog from '@/ui-component/dialog/ChatflowConfigurationDialog'
 import UpsertHistoryDialog from '@/views/vectorstore/UpsertHistoryDialog'
+import ViewLeadsDialog from '@/ui-component/dialog/ViewLeadsDialog'
+import ExportAsTemplateDialog from '@/ui-component/dialog/ExportAsTemplateDialog'
 
 // API
 import chatflowsApi from '@/api/chatflows'
@@ -28,12 +30,10 @@ import useApi from '@/hooks/useApi'
 import { generateExportFlowData } from '@/utils/genericHelper'
 import { uiBaseURL } from '@/store/constant'
 import { closeSnackbar as closeSnackbarAction, enqueueSnackbar as enqueueSnackbarAction, SET_CHATFLOW } from '@/store/actions'
-import ViewLeadsDialog from '@/ui-component/dialog/ViewLeadsDialog'
-import ExportAsTemplateDialog from '@/ui-component/dialog/ExportAsTemplateDialog'
 
 // ==============================|| CANVAS HEADER ||============================== //
 
-const CanvasHeader = ({ chatflow, isAgentCanvas, handleSaveFlow, handleDeleteFlow, handleLoadFlow }) => {
+const CanvasHeader = ({ chatflow, isAgentCanvas, isAgentflowV2, handleSaveFlow, handleDeleteFlow, handleLoadFlow }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -122,7 +122,13 @@ const CanvasHeader = ({ chatflow, isAgentCanvas, handleSaveFlow, handleDeleteFlo
                 const parsedFlowData = JSON.parse(flowData)
                 flowData = JSON.stringify(parsedFlowData)
                 localStorage.setItem('duplicatedFlowData', flowData)
-                window.open(`${uiBaseURL}/${isAgentCanvas ? 'agentcanvas' : 'canvas'}`, '_blank')
+                if (isAgentflowV2) {
+                    window.open(`${uiBaseURL}/v2/agentcanvas`, '_blank')
+                } else if (isAgentCanvas) {
+                    window.open(`${uiBaseURL}/agentcanvas`, '_blank')
+                } else {
+                    window.open(`${uiBaseURL}/canvas`, '_blank')
+                }
             } catch (e) {
                 console.error(e)
             }
@@ -130,7 +136,9 @@ const CanvasHeader = ({ chatflow, isAgentCanvas, handleSaveFlow, handleDeleteFlo
             try {
                 const flowData = JSON.parse(chatflow.flowData)
                 let dataStr = JSON.stringify(generateExportFlowData(flowData), null, 2)
-                let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+                //let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+                const blob = new Blob([dataStr], { type: 'application/json' })
+                const dataUri = URL.createObjectURL(blob)
 
                 let exportFileDefaultName = `${chatflow.name} ${title}.json`
 
@@ -253,9 +261,13 @@ const CanvasHeader = ({ chatflow, isAgentCanvas, handleSaveFlow, handleDeleteFlo
                                     }
                                 }}
                                 color='inherit'
-                                onClick={() =>
-                                    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate('/', { replace: true })
-                                }
+                                onClick={() => {
+                                    if (window.history.state && window.history.state.idx > 0) {
+                                        navigate(-1)
+                                    } else {
+                                        navigate('/', { replace: true })
+                                    }
+                                }}
                             >
                                 <IconChevronLeft stroke={1.5} size='1.3rem' />
                             </Avatar>
@@ -473,6 +485,7 @@ const CanvasHeader = ({ chatflow, isAgentCanvas, handleSaveFlow, handleDeleteFlo
                 show={chatflowConfigurationDialogOpen}
                 dialogProps={chatflowConfigurationDialogProps}
                 onCancel={() => setChatflowConfigurationDialogOpen(false)}
+                isAgentCanvas={isAgentCanvas}
             />
         </>
     )
@@ -483,7 +496,8 @@ CanvasHeader.propTypes = {
     handleSaveFlow: PropTypes.func,
     handleDeleteFlow: PropTypes.func,
     handleLoadFlow: PropTypes.func,
-    isAgentCanvas: PropTypes.bool
+    isAgentCanvas: PropTypes.bool,
+    isAgentflowV2: PropTypes.bool
 }
 
 export default CanvasHeader

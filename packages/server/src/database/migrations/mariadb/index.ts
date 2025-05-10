@@ -27,6 +27,8 @@ import { LongTextColumn1722301395521 } from './1722301395521-LongTextColumn'
 import { AddCustomTemplate1725629836652 } from './1725629836652-AddCustomTemplate'
 import { AddArtifactsToChatMessage1726156258465 } from './1726156258465-AddArtifactsToChatMessage'
 import { AddFollowUpPrompts1726666318346 } from './1726666318346-AddFollowUpPrompts'
+import { AddTypeToAssistant1733011290987 } from './1733011290987-AddTypeToAssistant'
+import { AddExecutionEntity1738090872625 } from './1738090872625-AddExecutionEntity'
 
 export const mariadbMigrations = [
     Init1693840429259,
@@ -57,5 +59,7 @@ export const mariadbMigrations = [
     LongTextColumn1722301395521,
     AddCustomTemplate1725629836652,
     AddArtifactsToChatMessage1726156258465,
-    AddFollowUpPrompts1726666318346
+    AddFollowUpPrompts1726666318346,
+    AddTypeToAssistant1733011290987,
+    AddExecutionEntity1738090872625
 ]

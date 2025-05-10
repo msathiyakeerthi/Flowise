@@ -166,7 +166,11 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, setError, update
         }
         try {
             await updateChatflowApi.request(chatflow.id, updateBody)
-            await updateFlowsApi.request()
+            if (isAgentCanvas && localStorage.getItem('agentFlowVersion') === 'v2') {
+                await updateFlowsApi.request('AGENTFLOW')
+            } else {
+                await updateFlowsApi.request(isAgentCanvas ? 'MULTIAGENT' : undefined)
+            }
         } catch (error) {
             if (setError) setError(error)
             enqueueSnackbar({
@@ -205,7 +209,7 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, setError, update
         }
         try {
             await updateChatflowApi.request(chatflow.id, updateBody)
-            await updateFlowsApi.request()
+            await updateFlowsApi.request(isAgentCanvas ? 'AGENTFLOW' : undefined)
         } catch (error) {
             if (setError) setError(error)
             enqueueSnackbar({
@@ -237,7 +241,11 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, setError, update
         if (isConfirmed) {
             try {
                 await chatflowsApi.deleteChatflow(chatflow.id)
-                await updateFlowsApi.request()
+                if (isAgentCanvas && localStorage.getItem('agentFlowVersion') === 'v2') {
+                    await updateFlowsApi.request('AGENTFLOW')
+                } else {
+                    await updateFlowsApi.request(isAgentCanvas ? 'MULTIAGENT' : undefined)
+                }
             } catch (error) {
                 if (setError) setError(error)
                 enqueueSnackbar({
@@ -272,7 +280,9 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, setError, update
         try {
             const flowData = JSON.parse(chatflow.flowData)
             let dataStr = JSON.stringify(generateExportFlowData(flowData), null, 2)
-            let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+            //let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+            const blob = new Blob([dataStr], { type: 'application/json' })
+            const dataUri = URL.createObjectURL(blob)
 
             let exportFileDefaultName = `${chatflow.name} ${title}.json`
 
